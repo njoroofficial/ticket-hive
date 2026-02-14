@@ -17,4 +17,4 @@ COPY . .
 
 # 6. Command: Tell the container how to run the app when it starts
 # host 0.0.0.0 is crucial for Docker networking
-CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "80"]
