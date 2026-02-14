@@ -1,4 +1,4 @@
-name: Build and Deploy
+name: TicketHive CI
 
 on:
   push:
@@ -7,14 +7,19 @@ on:
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Set up Python
+      - name: Set up Python 3.10
         uses: actions/setup-python@v4
         with:
-          python-version: "3.9"
+          python-version: "3.10"
 
       - name: Install dependencies and run tests
         run: |
@@ -32,6 +37,6 @@ jobs:
       - name: Build and push Docker image
         uses: docker/build-push-action@v5
         with:
-          context: .
+          context: ./backend
           push: true
           tags: ${{ secrets.DOCKER_USERNAME }}/tickethive:latest
