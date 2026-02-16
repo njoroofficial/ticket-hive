@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from contextlib import asynccontextmanager
 from app.database_setup.database import create_db_and_tables
+from app.api import event
 
 
 # The Startup Event
@@ -15,10 +16,11 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(lifespan=lifespan)
 
+# Plug in the event routes
+app.include_router(event.router)
+
 @app.get("/")
 def read_root():
     return {"message": "Welcome to TicketHive!", "status": "active"}
 
-@app.get("/health")
-def health_check():
-    return {"status": "healthy"}
+
