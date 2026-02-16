@@ -32,5 +32,32 @@ class EventCreate(EventBase):
     pass
 
 
+class EventUpdate(SQLModel):
+    name: str | None = Field(default=None, min_length=1, max_length=120)
+    date: datetime | None = None
+    price: Annotated[float | None, Field(default=None, gt=0)]
+    location: str | None = Field(default=None, min_length=1, max_length=255)
+
+    @field_validator("name", "location")
+    @classmethod
+    def strip_and_validate_optional_text(cls, value: str | None) -> str | None:
+        if value is None:
+            return value
+        cleaned = value.strip()
+        if not cleaned:
+            raise ValueError("value cannot be blank")
+        return cleaned
+
+    @field_validator("date")
+    @classmethod
+    def optional_event_date_must_be_future(cls, value: datetime | None) -> datetime | None:
+        if value is None:
+            return value
+        event_date = value if value.tzinfo else value.replace(tzinfo=timezone.utc)
+        if event_date <= datetime.now(timezone.utc):
+            raise ValueError("event date must be in the future")
+        return value
+
+
 class EventRead(EventBase):
     id: uuid.UUID
