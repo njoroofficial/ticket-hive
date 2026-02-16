@@ -1,5 +1,5 @@
 from sqlmodel import SQLModel, create_engine, Session
-from app.database_setup.models import Event
+from app.database_setup.schema import Event
 
 DATABASE_URL = "sqlite:///tickethive.db"
 
