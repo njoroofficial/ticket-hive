@@ -1,5 +1,5 @@
 import uuid
-from fastapi import APIRouter, Depends, HTTPException, Response, status
+from fastapi import APIRouter, Depends, HTTPException, Response, status, Query
 from sqlmodel import Session
 from app.database_setup.database import get_session
 from app.models.event import EventCreate, EventRead, EventUpdate
@@ -21,9 +21,9 @@ def create_event(event_data: EventCreate, session: Session = Depends(get_session
 
 
 @router.get("/events/", response_model=list[EventRead], status_code=status.HTTP_200_OK)
-def list_events(session: Session = Depends(get_session)) -> list[EventRead]:
+def list_events(offset : int = Query(default=0, ge=0) ,limit : int = Query(default=10, le=20),session: Session = Depends(get_session)) -> list[EventRead]:
     service = EventService(session)
-    return service.list_events()
+    return service.list_events(offset, limit)
 
 
 @router.get("/events/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)

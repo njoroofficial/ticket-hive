@@ -22,8 +22,8 @@ class EventService:
             raise RuntimeError("Failed to create event") from exc
 
     # Return all events ordered by date (soonest first).
-    def list_events(self) -> list[Event]:
-        statement = select(Event).order_by(Event.date)
+    def list_events(self, offset=0, limit=10) -> list[Event]:
+        statement = select(Event).order_by(Event.date).offset(offset).limit(limit)
         return list(self._db.exec(statement).all())
 
     # Fetch one event by id; raises LookupError when missing.
@@ -58,3 +58,4 @@ class EventService:
         except SQLAlchemyError as exc:
             self._db.rollback()
             raise RuntimeError("Failed to delete event") from exc
+        
