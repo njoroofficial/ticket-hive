@@ -1,6 +1,7 @@
 import uuid
 from datetime import datetime, timezone
 from sqlalchemy.exc import SQLAlchemyError
+from sqlalchemy import func
 from sqlmodel import Session, select
 from app.database_setup.schema import Booking, Event
 from app.models.booking import BookingCreate
@@ -13,12 +14,25 @@ class BookingService:
     def create_booking(self, booking_data: BookingCreate, user_id: uuid.UUID) -> Booking:
         """Book tickets for an event."""
 
-        # 1. Fetch the event
+        #    Fetch the event WITH A ROW-LEVEL LOCK
+        #    This prevents concurrent transactions from reading the same row
+        #    until this transaction commits/rolls back.
+
+        statement = (
+            select(Event)
+            .where(Event.id == booking_data.event_id)
+            .with_for_update()
+        )
+        event = self._db.exec(statement).first()
+        if not event:
+            raise LookupError("Event not found")
+
+
         event = self._db.get(Event, booking_data.event_id)
         if not event:
             raise LookupError("Event not found")
 
-        # 2. Make sure the event hasn't already passed
+        #  Make sure the event hasn't already passed
         event_date = (
             event.date
             if event.date.tzinfo
@@ -27,10 +41,23 @@ class BookingService:
         if event_date <= datetime.now(timezone.utc):
             raise ValueError("Cannot book a past event")
 
-        # 3. Calculate total price
+        # Count tickets already sold ──
+        statement = select(func.coalesce(func.sum(Booking.quantity), 0)).where(
+            Booking.event_id == booking_data.event_id
+        )
+        total_sold = self._db.exec(statement).one()
+
+        # Check if this booking would exceed capacity ──
+        if total_sold + booking_data.quantity > event.capacity:
+            available = event.capacity - total_sold
+            raise ValueError(
+                f"Not enough tickets. Only {available} ticket(s) remaining."
+            )
+
+        # Calculate total price
         total_price = round(event.price * booking_data.quantity, 2)
 
-        # 4. Create the booking row
+        # Create the booking row
         booking = Booking(
             event_id=booking_data.event_id,
             user_id=user_id,
