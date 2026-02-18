@@ -4,6 +4,8 @@ from sqlmodel import Session
 from app.database_setup.database import get_session
 from app.models.event import EventCreate, EventRead, EventUpdate
 from app.services.event_service import EventService
+from app.database_setup.schema import User
+from app.auth.deps import get_current_user
 
 router = APIRouter()
 
@@ -60,7 +62,7 @@ def update_event(
 
 
 @router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: uuid.UUID, session: Session = Depends(get_session)) -> Response:
+def delete_event(event_id: uuid.UUID, current_user: User = Depends(get_current_user) ,session: Session = Depends(get_session)) -> Response:
     service = EventService(session)
     try:
         service.delete_event(event_id)

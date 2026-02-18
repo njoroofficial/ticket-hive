@@ -1,5 +1,10 @@
 from fastapi import HTTPException, status
-from app.auth.security import hash_password, verify_password, create_access_token
+from app.auth.security import (
+    create_access_token,
+    create_refresh_token,
+    hash_password,
+    verify_password,
+)
 from app.models.user import UserRegister, UserLogin
 from app.database_setup.schema import User
 from sqlmodel import Session, select
@@ -54,10 +59,21 @@ class UserService:
         
         # Create the wristband (Token)
         access_token = create_access_token(data={"sub": user.email})
+        refresh_token = create_refresh_token(data={"sub": user.email})
+
+        # Save refresh token in DB as a "ticket stub" for future refresh flows.
+        try:
+            user.refresh_access_token = refresh_token
+            self._db.add(user)
+            self._db.commit()
+        except SQLAlchemyError as exc:
+            self._db.rollback()
+            raise RuntimeError("Failed to store refresh token") from exc
 
         # Return it to the frontend
         return {
             "access_token": access_token, 
+            "refresh_access_token": refresh_token,
             "token_type": "bearer",
             "user": {
                 "name": user.name,
