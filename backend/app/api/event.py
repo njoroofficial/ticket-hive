@@ -7,7 +7,7 @@ from app.services.event_service import EventService
 from app.database_setup.schema import User
 from app.auth.deps import get_current_user, get_current_admin
 
-router = APIRouter()
+router = APIRouter(prefix="/events", tags=["Events"])
 
 
 @router.post("/events/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
