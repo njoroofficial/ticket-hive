@@ -1,8 +1,23 @@
 from sqlmodel import SQLModel, create_engine, Session, select
 from app.database_setup.schema import Event, User
 from app.auth.security import hash_password
+from dotenv import load_dotenv
+from pathlib import Path
+import os
 
-DATABASE_URL = "sqlite:///tickethive.db"
+
+# Load environment variables from .env
+load_dotenv(dotenv_path=Path(__file__).resolve().parents[3] / ".env")
+
+# Fetch variables
+USER = os.getenv("user")
+PASSWORD = os.getenv("password")
+HOST = os.getenv("host")
+PORT = os.getenv("port")
+DBNAME = os.getenv("dbname")
+
+DATABASE_URL = f"postgresql://{USER}:{PASSWORD}@{HOST}:{PORT}/{DBNAME}"
+
 
 # Create the Engine
 # This is the "plug" that connects to the socket.

@@ -4,7 +4,7 @@ from app.database_setup.database import get_session
 from app.models.user import UserLogin, UserRead, UserRegister
 from app.services.user_service import UserService
 
-router = APIRouter()
+router = APIRouter(prefix="/auth", tags=["Auth"])
 
 
 @router.post("/register", response_model=UserRead, status_code=status.HTTP_201_CREATED)

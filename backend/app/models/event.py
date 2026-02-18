@@ -10,6 +10,7 @@ class EventBase(SQLModel):
     date: datetime
     price: Annotated[float, Field(gt=0)]
     location: str = Field(min_length=1, max_length=255)
+    capacity: int = Field(ge=1, description="Maximum number of tickets available")
 
     @field_validator("name", "location")
     @classmethod
@@ -37,6 +38,7 @@ class EventUpdate(SQLModel):
     date: datetime | None = None
     price: Annotated[float | None, Field(default=None, gt=0)]
     location: str | None = Field(default=None, min_length=1, max_length=255)
+    capacity: int | None = Field(default=None, ge=1)
 
     @field_validator("name", "location")
     @classmethod
