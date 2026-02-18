@@ -29,6 +29,7 @@ class UserDBBase(UserIdentityBase):
     email: EmailStr = Field(index=True, unique=True)
     hashed_password: str
     refresh_access_token: str | None = Field(default=None, min_length=1)
+    is_admin : bool = Field(default=False)
 
 
 class UserUpdate(SQLModel):
