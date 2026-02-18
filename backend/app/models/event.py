@@ -3,12 +3,12 @@ from datetime import datetime, timezone
 from typing import Annotated
 from pydantic import field_validator
 from sqlmodel import Field, SQLModel
-
+from decimal import Decimal
 
 class EventBase(SQLModel):
     name: str = Field(min_length=1, max_length=120)
     date: datetime
-    price: Annotated[float, Field(gt=0)]
+    price: Annotated[Decimal, Field(gt=0)]
     location: str = Field(min_length=1, max_length=255)
     capacity: int = Field(ge=1, description="Maximum number of tickets available")
 
@@ -36,7 +36,7 @@ class EventCreate(EventBase):
 class EventUpdate(SQLModel):
     name: str | None = Field(default=None, min_length=1, max_length=120)
     date: datetime | None = None
-    price: Annotated[float | None, Field(default=None, gt=0)]
+    price: Annotated[Decimal | None, Field(default=None, gt=0)]
     location: str | None = Field(default=None, min_length=1, max_length=255)
     capacity: int | None = Field(default=None, ge=1)
 

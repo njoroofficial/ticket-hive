@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 from pydantic import field_validator
 from sqlmodel import Field, SQLModel
 from typing import Annotated
+from decimal import Decimal
 
 
 class BookingBase(SQLModel):
@@ -32,5 +33,5 @@ class BookingRead(SQLModel):
     event_id: uuid.UUID
     user_id: uuid.UUID
     quantity: int
-    total_price: float
+    total_price: Decimal
     booked_at: datetime
