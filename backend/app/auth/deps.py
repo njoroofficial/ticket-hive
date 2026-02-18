@@ -21,7 +21,8 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], sessio
         # 1. Decode the Token
         payload = jwt.decode(token, SECRET_KEY, algorithms=[ALGORITHM])
         email: str = payload.get("sub")
-        if email is None:
+        token_type: str | None = payload.get("type")
+        if email is None or token_type != "access":
             raise credentials_exception
     except JWTError:
         raise credentials_exception
@@ -34,3 +35,11 @@ async def get_current_user(token: Annotated[str, Depends(oauth2_scheme)], sessio
         raise credentials_exception
         
     return user
+
+async def get_current_admin(current_user: Annotated[User, Depends(get_current_user)]) -> User:
+    if not current_user.is_admin:
+        raise HTTPException(
+            status_code=status.HTTP_403_FORBIDDEN,
+            detail="You do not have admin privileges",
+        )
+    return current_user

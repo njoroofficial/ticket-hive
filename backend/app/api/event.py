@@ -4,12 +4,14 @@ from sqlmodel import Session
 from app.database_setup.database import get_session
 from app.models.event import EventCreate, EventRead, EventUpdate
 from app.services.event_service import EventService
+from app.database_setup.schema import User
+from app.auth.deps import get_current_user, get_current_admin
 
 router = APIRouter()
 
 
 @router.post("/events/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
-def create_event(event_data: EventCreate, session: Session = Depends(get_session)) -> EventRead:
+def create_event(event_data: EventCreate, admin: User = Depends(get_current_admin) ,session: Session = Depends(get_session)) -> EventRead:
     service = EventService(session)
     try:
         return service.create_event(event_data)
@@ -42,6 +44,7 @@ def get_event(event_id: uuid.UUID, session: Session = Depends(get_session)) -> E
 def update_event(
     event_id: uuid.UUID,
     event_data: EventUpdate,
+    admin: User = Depends(get_current_admin),
     session: Session = Depends(get_session),
 ) -> EventRead:
     service = EventService(session)
@@ -60,7 +63,7 @@ def update_event(
 
 
 @router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
-def delete_event(event_id: uuid.UUID, session: Session = Depends(get_session)) -> Response:
+def delete_event(event_id: uuid.UUID, admin: User = Depends(get_current_admin) ,session: Session = Depends(get_session)) -> Response:
     service = EventService(session)
     try:
         service.delete_event(event_id)
