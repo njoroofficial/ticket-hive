@@ -18,8 +18,8 @@ async def lifespan(app: FastAPI):
 app = FastAPI(lifespan=lifespan)
 
 # Plug in the routes
-app.include_router(event.router)
 app.include_router(user.router)
+app.include_router(event.router)
 
 @app.get("/")
 def read_root():
