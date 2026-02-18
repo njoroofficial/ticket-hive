@@ -14,10 +14,9 @@ class BookingService:
     def create_booking(self, booking_data: BookingCreate, user_id: uuid.UUID) -> Booking:
         """Book tickets for an event."""
 
-        #    Fetch the event WITH A ROW-LEVEL LOCK
-        #    This prevents concurrent transactions from reading the same row
-        #    until this transaction commits/rolls back.
-
+        # Fetch the event WITH A ROW-LEVEL LOCK
+        # This prevents concurrent transactions from reading the same row
+        # until this transaction commits/rolls back.
         statement = (
             select(Event)
             .where(Event.id == booking_data.event_id)
@@ -27,12 +26,7 @@ class BookingService:
         if not event:
             raise LookupError("Event not found")
 
-
-        event = self._db.get(Event, booking_data.event_id)
-        if not event:
-            raise LookupError("Event not found")
-
-        #  Make sure the event hasn't already passed
+        # Make sure the event hasn't already passed
         event_date = (
             event.date
             if event.date.tzinfo
@@ -41,13 +35,13 @@ class BookingService:
         if event_date <= datetime.now(timezone.utc):
             raise ValueError("Cannot book a past event")
 
-        # Count tickets already sold ──
+        # Count tickets already sold
         statement = select(func.coalesce(func.sum(Booking.quantity), 0)).where(
             Booking.event_id == booking_data.event_id
         )
-        total_sold = self._db.exec(statement).one()
+        total_sold = self._db.scalar(statement) or 0
 
-        # Check if this booking would exceed capacity ──
+        # Check if this booking would exceed capacity
         if total_sold + booking_data.quantity > event.capacity:
             available = event.capacity - total_sold
             raise ValueError(
