@@ -28,3 +28,6 @@ build/
 .pytest_cache/
 .coverage
 htmlcov/
+
+# Ignore test for race condition and setting up an event
+test

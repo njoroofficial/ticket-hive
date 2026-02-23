@@ -10,7 +10,7 @@ from app.auth.deps import get_current_user, get_current_admin
 router = APIRouter(prefix="/events", tags=["Events"])
 
 
-@router.post("/events/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
+@router.post("/", response_model=EventRead, status_code=status.HTTP_201_CREATED)
 def create_event(event_data: EventCreate, admin: User = Depends(get_current_admin) ,session: Session = Depends(get_session)) -> EventRead:
     service = EventService(session)
     try:
@@ -22,13 +22,13 @@ def create_event(event_data: EventCreate, admin: User = Depends(get_current_admi
         ) from exc
 
 
-@router.get("/events/", response_model=list[EventRead], status_code=status.HTTP_200_OK)
+@router.get("/", response_model=list[EventRead], status_code=status.HTTP_200_OK)
 def list_events(offset : int = Query(default=0, ge=0) ,limit : int = Query(default=10, le=20),session: Session = Depends(get_session)) -> list[EventRead]:
     service = EventService(session)
     return service.list_events(offset, limit)
 
 
-@router.get("/events/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
+@router.get("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def get_event(event_id: uuid.UUID, session: Session = Depends(get_session)) -> EventRead:
     service = EventService(session)
     try:
@@ -40,7 +40,7 @@ def get_event(event_id: uuid.UUID, session: Session = Depends(get_session)) -> E
         ) from exc
 
 
-@router.patch("/events/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
+@router.patch("/{event_id}", response_model=EventRead, status_code=status.HTTP_200_OK)
 def update_event(
     event_id: uuid.UUID,
     event_data: EventUpdate,
@@ -62,7 +62,7 @@ def update_event(
         ) from exc
 
 
-@router.delete("/events/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
+@router.delete("/{event_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_event(event_id: uuid.UUID, admin: User = Depends(get_current_admin) ,session: Session = Depends(get_session)) -> Response:
     service = EventService(session)
     try:

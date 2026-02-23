@@ -9,7 +9,7 @@ from app.auth.deps import get_current_user, get_current_admin
 
 router = APIRouter(prefix="/bookings", tags=["Bookings"])
 
-
+# Create a booking
 @router.post("/", response_model=BookingRead, status_code=status.HTTP_201_CREATED)
 def create_booking(
     booking_data: BookingCreate,
@@ -36,7 +36,7 @@ def create_booking(
             detail="Unable to create booking at this time.",
         ) from exc
 
-
+# List all bookings for the currently logged-in user
 @router.get("/me", response_model=list[BookingRead], status_code=status.HTTP_200_OK)
 def list_my_bookings(
     current_user: User = Depends(get_current_user),
@@ -46,7 +46,7 @@ def list_my_bookings(
     service = BookingService(session)
     return service.list_user_bookings(current_user.id)
 
-
+# Get a specific booking
 @router.get("/{booking_id}", response_model=BookingRead, status_code=status.HTTP_200_OK)
 def get_booking(
     booking_id: uuid.UUID,
@@ -68,7 +68,7 @@ def get_booking(
             detail=str(exc),
         ) from exc
 
-
+# Cancel a booking
 @router.delete("/{booking_id}", status_code=status.HTTP_204_NO_CONTENT)
 def cancel_booking(
     booking_id: uuid.UUID,
@@ -96,7 +96,7 @@ def cancel_booking(
         ) from exc
     return Response(status_code=status.HTTP_204_NO_CONTENT)
 
-
+# list all bookings for a specific event
 @router.get(
     "/event/{event_id}",
     response_model=list[BookingRead],
